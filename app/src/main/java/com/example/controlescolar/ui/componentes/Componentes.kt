@@ -136,16 +136,16 @@ fun CampoSelector(
         modifier = modifier.fillMaxWidth()
     ) {
         OutlinedTextField(
-            value = seleccion ?: textoVacio,
+            value = seleccion.orEmpty(),
             onValueChange = {},
             readOnly = true,
             modifier = Modifier
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                 .fillMaxWidth(),
             label = { Text(etiqueta) },
+            placeholder = { Text(textoVacio) },
             textStyle = LocalTextStyle.current.copy(
-                color = if (seleccion == null) MaterialTheme.colorScheme.onSurfaceVariant
-                else MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface
             ),
             trailingIcon = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -161,7 +161,11 @@ fun CampoSelector(
             singleLine = true,
             shape = FormaCampo
         )
-        ExposedDropdownMenu(expanded = expandido, onDismissRequest = { expandido = false }) {
+        ExposedDropdownMenu(
+            expanded = expandido,
+            onDismissRequest = { expandido = false },
+            modifier = Modifier.exposedDropdownSize()
+        ) {
             opciones.forEach { (id, nombre) ->
                 DropdownMenuItem(
                     text = { Text(nombre) },

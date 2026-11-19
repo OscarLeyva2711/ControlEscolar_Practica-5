@@ -13,6 +13,9 @@ interface CarreraDao {
     @Query("SELECT * FROM carreras ORDER BY nombre ASC")
     fun observarTodas(): Flow<List<Carrera>>
 
+    @Query("SELECT COUNT(*) FROM carreras")
+    suspend fun contar(): Int
+
     @Query("SELECT * FROM carreras WHERE id = :id")
     suspend fun obtenerPorId(id: Long): Carrera?
 

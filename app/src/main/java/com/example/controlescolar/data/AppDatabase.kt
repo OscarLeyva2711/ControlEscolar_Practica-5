@@ -10,7 +10,7 @@ import java.util.concurrent.Executors
 
 @Database(
     entities = [Carrera::class, Materia::class, Alumno::class, Calificacion::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -31,9 +31,17 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "control_escolar.db"
                 )
+                    .fallbackToDestructiveMigration(true)
                     .addCallback(object : Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
+                            Executors.newSingleThreadExecutor().execute {
+                                prepoblarBaseDatos(getInstance(context))
+                            }
+                        }
+
+                        override fun onOpen(db: SupportSQLiteDatabase) {
+                            super.onOpen(db)
                             Executors.newSingleThreadExecutor().execute {
                                 prepoblarBaseDatos(getInstance(context))
                             }
@@ -50,29 +58,31 @@ abstract class AppDatabase : RoomDatabase() {
             val m1 = db.materiaDao()
 
             runBlocking {
-                val idSistemas = c1.insertar(Carrera(id = 1, nombre = "Ingeniería en Sistemas Computacionales"))
-                val idIndustrial = c1.insertar(Carrera(id = 2, nombre = "Ingeniería Industrial"))
-                val idAdmin = c1.insertar(Carrera(id = 3, nombre = "Licenciatura en Administración"))
+                if (c1.contar() == 0) {
+                    val idComputacion = c1.insertar(Carrera(id = 1, nombre = "Ingeniería en Computación"))
+                    val idIndustrial = c1.insertar(Carrera(id = 2, nombre = "Ingeniería Industrial"))
+                    val idBioingenieria = c1.insertar(Carrera(id = 3, nombre = "Bioingeniería"))
 
-                m1.insertarTodas(
-                    listOf(
-                        Materia(carreraId = idSistemas, nombre = "Programación Orientada a Objetos"),
-                        Materia(carreraId = idSistemas, nombre = "Estructura de Datos"),
-                        Materia(carreraId = idSistemas, nombre = "Bases de Datos"),
-                        Materia(carreraId = idSistemas, nombre = "Redes de Computadoras"),
-                        Materia(carreraId = idSistemas, nombre = "Ingeniería de Software"),
+                    m1.insertarTodas(
+                        listOf(
+                            Materia(carreraId = idComputacion, nombre = "Programación Orientada a Objetos"),
+                            Materia(carreraId = idComputacion, nombre = "Estructura de Datos"),
+                            Materia(carreraId = idComputacion, nombre = "Bases de Datos"),
+                            Materia(carreraId = idComputacion, nombre = "Redes de Computadoras"),
+                            Materia(carreraId = idComputacion, nombre = "Ingeniería de Software"),
 
-                        Materia(carreraId = idIndustrial, nombre = "Estadística Industrial"),
-                        Materia(carreraId = idIndustrial, nombre = "Control de Calidad"),
-                        Materia(carreraId = idIndustrial, nombre = "Investigación de Operaciones"),
-                        Materia(carreraId = idIndustrial, nombre = "Logística y Cadenas de Suministro"),
+                            Materia(carreraId = idIndustrial, nombre = "Estadística Industrial"),
+                            Materia(carreraId = idIndustrial, nombre = "Control de Calidad"),
+                            Materia(carreraId = idIndustrial, nombre = "Investigación de Operaciones"),
+                            Materia(carreraId = idIndustrial, nombre = "Logística y Cadenas de Suministro"),
 
-                        Materia(carreraId = idAdmin, nombre = "Contabilidad Financiera"),
-                        Materia(carreraId = idAdmin, nombre = "Mercadotecnia"),
-                        Materia(carreraId = idAdmin, nombre = "Administración de Recursos Humanos"),
-                        Materia(carreraId = idAdmin, nombre = "Finanzas Corporativas")
+                            Materia(carreraId = idBioingenieria, nombre = "Bioquímica"),
+                            Materia(carreraId = idBioingenieria, nombre = "Fisiología"),
+                            Materia(carreraId = idBioingenieria, nombre = "Microbiología"),
+                            Materia(carreraId = idBioingenieria, nombre = "Biología molecular")
+                        )
                     )
-                )
+                }
             }
         }
     }
